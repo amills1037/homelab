@@ -1,0 +1,24 @@
+---
+- name: Bootstrap Debian servers
+  hosts: debian
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../ssh-keys.yaml
+  tasks:
+    - name: Install ansible public key
+      ansible.builtin.shell: |
+          mkdir -p ~ansible/.ssh
+          chmod 700 ~ansible/.ssh
+          chown ansible:ansible ~ansible/.ssh
+          echo "{{ ansible_ssh_key_pub }}" > ~ansible/.ssh/authorized_keys
+          chmod 600 ~ansible/.ssh/authorized_keys
+          chown ansible:ansible ~ansible/.ssh/authorized_keys
+      args:
+        creates: /home/ansible/.ssh/authorized_keys
+
+    - name: Add ansible as sudoer
+      ansible.builtin.copy:
+        content: "ansible ALL=(ALL) NOPASSWD:ALL\n"
+        dest: /etc/sudoers.d/99-ansible-users
+        force: no

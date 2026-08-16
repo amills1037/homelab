@@ -1,0 +1,54 @@
+---
+- name: Initialize K3S primary control plane
+  hosts: kube_prime_node
+  become: true
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: Init cluster on primary node
+      ansible.builtin.shell: |
+        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --cluster-init
+
+
+   #  sudo kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/manifests/metallb-native.yaml
+   # 41  sudo kubectl apply -f metallb-home.yaml
+   # 42  kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.12.0/deploy/longhorn.yaml
+   # 43  sudo kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.12.0/deploy/longhorn.yaml
+
+---
+- name: Initialize K3S seconday control planes
+  hosts: kube_secondary_nodes
+  become: true
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: Init cluster on seconday nodes
+      ansible.builtin.shell: |
+        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --server https://{{ k3s_prime_ip }}:6443
+
+---
+- name: Initialize K3S control planes
+  hosts: kube_control_plane_nodes
+  become: true
+  tasks:
+    - name: Make kube directory
+      ansible.builtin.file:
+        path: /home/ansible/.kube
+        state: directory
+        mode: '0755'
+        owner: ansible
+        group: ansible
+
+    - name: Copy kube config file
+      ansible.builtin.copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/ansible/.kube/config
+        mode: '600'
+        owner: ansible
+        group: ansible
+        remote_src: true
+
+    - name: Append KUBECONFIG to end of .profile
+      ansible.builtin.lineinfile:
+        path: /home/ansible/.profile
+        line: export KUBECONFIG="/home/ansible/.kube/config"

@@ -1,0 +1,9 @@
+---
+- name: Upgrade k3s to the latest version
+  hosts: kube_nodes
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: upgrade
+      ansible.builtin.shell: |
+        echo curl -sfL https://get.k3s.io | sh -s -

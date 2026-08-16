@@ -1,0 +1,10 @@
+---
+- name: Initialize K3S primary control plane
+  hosts: kube_worker_nodes
+  become: true
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: Init cluster on primary node
+      ansible.builtin.shell: |
+        echo curl -sfL https://get.k3s.io | K3S_URL=https://{{ k3s_primary_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -

@@ -1,0 +1,48 @@
+---
+- name: Update Raspberry Pi OS nodes to support K3S
+  hosts: raspberry_pi_os
+  become: true
+  tasks:
+    - name: Add cgroup_enable memory to boot command line
+      ansible.builtin.replace:
+        path: /boot/firmware/cmdline.txt
+        regexp: '^(?!.* cgroup_enable=memory.*)(\s*console=.*)$'
+        replace: '\1 cgroup_enable=memory'
+
+    - name: Add cgroup_enable memory to boot command line
+      ansible.builtin.replace:
+        path: /boot/firmware/cmdline.txt
+        regexp: '^(?!.* cgroup_memory=1.*)(\s*console=.*)$'
+        replace: '\1 cgroup_memory=1'
+
+    - name: Disable wifi on Raspberry Pi
+      ansible.builtin.lineinfile:
+        path: /boot/firmware/config.txt
+        line: "dtoverlay=disable-wifi"
+        insertafter: EOF
+        state: present
+
+    - name: Disable bluetooth on Raspberry Pi
+      ansible.builtin.lineinfile:
+        path: /boot/firmware/config.txt
+        line: "dtoverlay=disable-bt"
+        insertafter: EOF
+        state: present
+
+    - name: Add packages
+      ansible.builtin.package:
+        name:
+          - curl
+          - open-iscsi
+        update_cache: true
+---
+- name: Update Debian nodes to support K3S
+  hosts: debian
+  become: true
+  tasks:
+    - name: Add packages
+      ansible.builtin.package:
+        name:
+          - curl
+          - open-iscsi
+        update_cache: true

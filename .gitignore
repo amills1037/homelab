@@ -1,0 +1,6 @@
+# ignore hosts file
+hosts.yaml
+
+# ignore variable file
+ssh-keys.yaml
+k3s-vars.yaml

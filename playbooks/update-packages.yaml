@@ -1,0 +1,20 @@
+---
+- name: Update Raspberry Pi packages
+  hosts: raspberry_pi_os
+  become: true
+
+  tasks:
+    - name: Run apt update and upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+
+- name: Update Debian packages
+  hosts: debian
+  become: true
+
+  tasks:
+    - name: Run apt update and upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true

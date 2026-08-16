@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: block-break-dev
+  namespace: block-break
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 22
+  selector:
+    app: block-break-dev
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: block-break-dev
+  namespace: block-break
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: block-break-dev
+  template:
+    metadata:
+      labels:
+        app: block-break-dev
+    spec:
+      volumes:
+        - name: auth-keys
+          configMap:
+            name: ssh-authorized-keys
+      initContainers:
+        - name: file-prep
+          image: debian:trixie # This should match block-break-dev container
+          command:
+            - sh
+            - -c
+            - mkdir -p /dev-home/dev/.ssh && cp -r --update=none /etc/skel/. /dev-home/dev/ && cp /auth-keys/authorized_keys /dev-home/dev/.ssh/authorized_keys && chown -R 1000:1000 /dev-home/dev && chmod 600 /dev-home/dev/.ssh/authorized_keys
+          volumeMounts:
+            - name: block-break-dev-home
+              mountPath: /dev-home
+            - name: auth-keys
+              mountPath: /auth-keys
+              readOnly: true
+      containers:
+      - name: block-break-dev
+        image: ghcr.io/amills1037/blockbreak-devel:main # Example SSH image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 22
+        volumeMounts:
+        - name: block-break-dev-home
+          mountPath: /home
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - aila
+  volumeClaimTemplates:
+    - metadata:
+        name: block-break-dev-home
+        namespace: block-break
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: longhorn-strict-local
+        resources:
+          requests:
+            storage: 50Gi
