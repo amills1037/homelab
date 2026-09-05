@@ -3,10 +3,14 @@ kind: Service
 metadata:
   name: block-break-dev
   namespace: block-break
+  annotations:
+      metallb.io/loadBalancerIPs: "10.214.0.3"
 spec:
   type: LoadBalancer
   ports:
-    - port: 22
+    - protocol: TCP
+      port: 2024
+      targetPort: 22
   selector:
     app: block-break-dev
 ---
@@ -51,22 +55,27 @@ spec:
         volumeMounts:
         - name: block-break-dev-home
           mountPath: /home
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/hostname
-                operator: In
-                values:
-                  - aila
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: kubernetes.io/hostname
+      #           operator: In
+      #           values:
+      #             - devel
+      # tolerations:
+      #   - key: "ai/gpu"
+      #     operator: "Equal"
+      #     value: "true"
+      #     effect: "NoSchedule"
   volumeClaimTemplates:
     - metadata:
         name: block-break-dev-home
         namespace: block-break
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: longhorn-strict-local
+        storageClassName: devel-strict-local
         resources:
           requests:
             storage: 50Gi

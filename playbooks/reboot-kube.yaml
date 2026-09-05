@@ -1,0 +1,16 @@
+---
+- name: Reboot servers one at a time
+  hosts: kube_nodes
+  become: true
+  serial: 1
+
+  tasks:
+    - name: Reboot the machine and wait for it to come back online
+      ansible.builtin.reboot:
+        msg: "Reboot intiated. Reconnecting..."
+        connect_timeout: 5
+        reboot_timeout: 600
+        post_reboot_delay: 30
+        pre_reboot_delay: 30
+        reboot_command: /sbin/reboot
+        # test_command:

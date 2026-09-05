@@ -32,3 +32,15 @@ parameters:
   dataLocality: "strict-local"
   fsType: "ext4"
   nodeSelector: "devel"
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: external-strict-local
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+parameters:
+  numberOfReplicas: "1"
+  dataLocality: "strict-local"
+  fsType: "ext4"
+  nodeSelector: "external"

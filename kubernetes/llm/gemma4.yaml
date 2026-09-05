@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: gemma4-statefulset
+  namespace: llm
+spec:
+  serviceName: gemma4-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gemma4
+  template:
+    metadata:
+      labels:
+        app: gemma4
+    spec:
+      initContainers:
+        - name: download-model
+          image: curlimages/curl:latest
+          securityContext:
+              runAsUser: 0
+              privileged: true
+          env:
+            - name: MODEL_URL
+              value: "https://huggingface.co/unsloth/gemma-4-26B-A4B-it-qat-GGUF/resolve/main/gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf?download=true"
+            - name: MTP_URL
+              value: "https://huggingface.co/unsloth/gemma-4-26B-A4B-it-qat-GGUF/resolve/main/MTP/mtp-gemma-4-26B-A4B-it-Q4_0.gguf?download=true"
+          command:
+            - sh
+            - -c
+            - |
+                curl -L -O -C - --output-dir /models --skip-existing \
+                  "${MODEL_URL}"
+                curl -L -O -C - --output-dir /models --skip-existing \
+                  "${MTP_URL}"
+          volumeMounts:
+            - name: gemma4-storage
+              mountPath: /models
+      containers:
+        - name: gemma4
+          image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+          securityContext:
+              runAsUser: 0
+              privileged: true
+          # temperature=1.0
+          # top_p=0.95
+          # top_k=64
+          env:
+            - name: AMD_VULKAN_ICD
+              value:  RADV
+            - name: GGML_VK_ALLOW_GRAPHICS_QUEUE
+              value:  "1"
+            - name: RADV_PERFTEST
+              value:  nogttspill
+          args:
+            - --server
+            - --port
+            - "8002"
+            - --host
+            - 0.0.0.0
+            - -m
+            - /data/gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf
+            - -md
+            - /data/mtp-gemma-4-26B-A4B-it-Q4_0.gguf
+            - --ctx-size
+            - "262144"
+            - --temp
+            - "1.0"
+            - --top_p
+            - "0.95"
+            - --top_k
+            - "64"
+            - --spec-type
+            - draft-mtp
+            - --spec-draft-n-max
+            - "4"
+          resources:
+             requests:
+               memory: "1024Mi"
+               cpu: "1000m"
+          ports:
+            - containerPort: 8002
+              name: llama
+              hostPort: 8002
+          volumeMounts:
+            - name: gemma4-storage
+              mountPath: /data
+            - name: dev-kfd
+              mountPath: /dev/kfd
+            - name: dev-dri
+              mountPath: /dev/dri
+      volumes:
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+      tolerations:
+        - key: "ai/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+  volumeClaimTemplates:
+    - metadata:
+        name: gemma4-storage
+        namespace: llm
+      spec:
+        storageClassName: ai-strict-local
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 50Gi

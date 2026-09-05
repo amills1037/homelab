@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qwen3-6-statefulset
+  namespace: llm
+spec:
+  serviceName: qwen3-6-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qwen3-6
+  template:
+    metadata:
+      labels:
+        app: qwen3-6
+    spec:
+      initContainers:
+        - name: download-model
+          image: curlimages/curl:latest
+          securityContext:
+              runAsUser: 0
+              privileged: true
+          env:
+            - name: MODEL_URL
+              value: "https://huggingface.co/unsloth/Qwen3.6-35B-A3B-MTP-GGUF/resolve/main/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf?download=true"
+          command:
+            - sh
+            - -c
+            - |
+                curl -L -O -C - --output-dir /models --skip-existing \
+                  "${MODEL_URL}"
+          volumeMounts:
+            - name: qwen3-6-storage
+              mountPath: /models
+      securityContext:
+        supplementalGroups: [44, 992]
+      containers:
+        - name: qwen3-6
+          image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+          securityContext:
+              runAsUser: 0
+              privileged: true
+          env:
+            - name: AMD_VULKAN_ICD
+              value:  RADV
+            - name: GGML_VK_ALLOW_GRAPHICS_QUEUE
+              value:  "1"
+            - name: RADV_PERFTEST
+              value:  nogttspill
+          args:
+            - --server
+            - --port
+            - "8003"
+            - --host
+            - 0.0.0.0
+            - -m
+            - /data/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
+            - --ctx-size
+            - "32768"
+            - --temp
+            - "1.0"
+            - --top_p
+            - "0.95"
+            - --top_k
+            - "20"
+            - --min_p
+            - "0.0"
+            - --presence_penalty
+            - "0.0"
+            - --repeat_penalty
+            - "1.0"
+            - --spec-type
+            - draft-mtp
+            - --spec-draft-n-max
+            - "2"
+          resources:
+             requests:
+               memory: "1024Mi"
+               cpu: "1000m"
+          ports:
+            - containerPort: 8003
+              name: llama
+              hostPort: 8003
+          volumeMounts:
+            - name: qwen3-6-storage
+              mountPath: /data
+            - name: dev-kfd
+              mountPath: /dev/kfd
+            - name: dev-dri
+              mountPath: /dev/dri
+      volumes:
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+      tolerations:
+        - key: "ai/gpu"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+  volumeClaimTemplates:
+    - metadata:
+        name: qwen3-6-storage
+        namespace: llm
+      spec:
+        storageClassName: ai-strict-local
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 50Gi

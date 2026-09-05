@@ -35,7 +35,6 @@
           - curl
           - open-iscsi
         update_cache: true
----
 - name: Update Debian nodes to support K3S
   hosts: debian
   become: true
