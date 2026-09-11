@@ -8,6 +8,8 @@
       ansible.builtin.apt:
         update_cache: true
         upgrade: true
+        autoclean: true
+        autoremove: true
 
 - name: Update Debian packages
   hosts: debian
@@ -18,3 +20,5 @@
       ansible.builtin.apt:
         update_cache: true
         upgrade: true
+        autoclean: true
+        autoremove: true

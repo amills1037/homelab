@@ -34,6 +34,7 @@
         name:
           - curl
           - open-iscsi
+          - nfs-common
         update_cache: true
 - name: Update Debian nodes to support K3S
   hosts: debian
@@ -44,4 +45,5 @@
         name:
           - curl
           - open-iscsi
+          - nfs-common
         update_cache: true

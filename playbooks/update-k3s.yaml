@@ -1,9 +1,29 @@
----
-- name: Upgrade k3s to the latest version
-  hosts: kube_nodes
+- name: Update K3S primary control plane
+  hosts: kube_prime_node
+  become: true
   vars_files:
     - ../k3s-vars.yaml
   tasks:
-    - name: upgrade
+    - name: Update primary control plane
       ansible.builtin.shell: |
-        echo curl -sfL https://get.k3s.io | sh -s -
+        curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --cluster-init
+
+---
+- name: Update K3S seconday control planes
+  hosts: kube_secondary_nodes
+  become: true
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: Update seconday control planes
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --server https://{{ k3s_prime_ip }}:6443
+
+- name: Update K3S workers
+  hosts: kube_worker_nodes
+  vars_files:
+    - ../k3s-vars.yaml
+  tasks:
+    - name: Update workers
+      ansible.builtin.shell: |
+        curl -sfL https://get.k3s.io | K3S_URL=https://{{ k3s_primary_ip }}:6443 K3S_TOKEN={{ k3s_token }} sh -

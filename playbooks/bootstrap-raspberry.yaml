@@ -13,3 +13,9 @@
           chown ansible:ansible ~ansible/.ssh/authorized_keys
       args:
         creates: /home/ansible/.ssh/authorized_keys
+
+    - name: Add ansible as sudoer
+      ansible.builtin.copy:
+        content: "ansible ALL=(ALL) NOPASSWD:ALL\n"
+        dest: /etc/sudoers.d/99-ansible-users
+        force: no
