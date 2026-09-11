@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homelab
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homelab-dev
+  namespace: homelab
+  annotations:
+      metallb.io/loadBalancerIPs: "10.214.0.33"
+spec:
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 2024
+      targetPort: 22
+  selector:
+    app: homelab-dev
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homelab-claim
+  namespace: homelab
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: devel-storage
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: homelab-dev
+  namespace: homelab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homelab-dev
+  template:
+    metadata:
+      labels:
+        app: homelab-dev
+    spec:
+      volumes:
+        - name: homelab-dev-home
+          persistentVolumeClaim:
+            claimName: homelab-claim
+        - name: auth-keys
+          configMap:
+            name: ssh-authorized-keys
+      initContainers:
+        - name: file-prep
+          image: debian:trixie # This should match block-break-dev container
+          command:
+            - sh
+            - -c
+            - mkdir -p /dev-home/dev/.ssh && cp -r --update=none /etc/skel/. /dev-home/dev/ && cp /auth-keys/authorized_keys /dev-home/dev/.ssh/authorized_keys && chown -R 1000:1000 /dev-home/dev && chmod 600 /dev-home/dev/.ssh/authorized_keys
+          volumeMounts:
+            - name: homelab-dev-home
+              mountPath: /dev-home
+              subPath: homelab
+            - name: auth-keys
+              mountPath: /auth-keys
+              readOnly: true
+      containers:
+        - name: homelab-dev
+          image: ghcr.io/amills1037/homelab-devel:main
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 22
+          volumeMounts:
+          - name: homelab-dev-home
+            mountPath: /home
+            subPath: homelab
