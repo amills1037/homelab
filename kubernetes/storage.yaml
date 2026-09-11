@@ -57,16 +57,3 @@ parameters:
   share: /volume1/devel      # Replace with your NFS share path
 reclaimPolicy: Retain        # Keeps data if PVC is deleted
 volumeBindingMode: Immediate
----
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: database-storage
-provisioner: nfs.csi.k8s.io
-mountOptions:
-  - vers=4.1
-parameters:
-  server: 192.168.7.227
-  share: /volume1/devel      # Replace with your NFS share path
-reclaimPolicy: Retain        # Keeps data if PVC is deleted
-volumeBindingMode: Immediate
