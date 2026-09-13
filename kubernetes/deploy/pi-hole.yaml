@@ -79,3 +79,7 @@ spec:
         resources:
           requests:
             storage: 5Gi
+
+## Suggested by Reddit
+## https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.txt
+##
