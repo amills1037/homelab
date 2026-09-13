@@ -16,8 +16,9 @@ git config --global user.signingkey $HOME/.ssh/id_ed25519.pub
 git config --global commit.gpgsign true
 
 mkdir -p ~/.config/git
-cat $HOME/.ssh/id_ed25519.pub > $HOME/.config/git/allowed-signers
+echo "$(git config --global user.email) $(cat $HOME/.ssh/id_ed25519.pub)" > $HOME/.config/git/allowed-signers
 git config --global gpg.ssh.allowedSignersFile $HOME/.config/git/allowed-signers
 
-git show HEAD --show-signature
+## Use command after commit but before push to check signature
+git log @{u}.. --show-signature
 ```
