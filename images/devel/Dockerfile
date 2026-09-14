@@ -53,7 +53,7 @@ RUN apt-get update
 RUN apt-get install -y mongodb-mongosh
 
 ## install tools
-RUN apt install -y vim bind9-host iproute2
+RUN apt install -y vim bind9-host iproute2 ansible kubectl
 
 EXPOSE 22
 
