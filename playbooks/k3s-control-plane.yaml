@@ -11,6 +11,7 @@
 
    # kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/manifests/metallb-native.yaml
    # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.12.0/deploy/longhorn.yaml
+   # kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
    # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.13.4/deploy/install-driver.sh | bash -s v4.13.4 --
    # ## not installed yet # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-iscsi/master/deploy/install-driver.sh | bash -s master --
@@ -24,7 +25,7 @@
   tasks:
     - name: Init cluster on seconday nodes
       ansible.builtin.shell: |
-        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --server https://{{ k3s_prime_ip }}:6443
+        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --server https://{{ k3s_prime_ip }}:6443
 
 ---
 - name: Initialize K3S control planes
