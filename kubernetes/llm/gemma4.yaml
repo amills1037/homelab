@@ -39,6 +39,7 @@ spec:
       containers:
         - name: gemma4
           image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+          imagePullPolicy: Always
           securityContext:
               runAsUser: 0
               privileged: true

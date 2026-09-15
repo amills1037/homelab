@@ -70,7 +70,7 @@ spec:
               readOnly: true
       containers:
         - name: homelab-dev
-          image: ghcr.io/amills1037/homelab-devel:main
+          image: ghcr.io/amills1037/homelab-devel:latest
           imagePullPolicy: Always
           ports:
           - containerPort: 22

@@ -37,6 +37,7 @@ spec:
       containers:
         - name: qwen3-6
           image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+          imagePullPolicy: Always
           securityContext:
               runAsUser: 0
               privileged: true
