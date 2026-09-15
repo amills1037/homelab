@@ -3,9 +3,8 @@ kind: Service
 metadata:
   name: load-balancer-longhorn-ui
   namespace: longhorn-system
-  # annotations:
-  #   metallb.io/loadBalancerIPs: 10.214.0.20
-    # kube-vip.io/loadbalancerIPs: 10.214.0.20
+  annotations:
+    metallb.io/loadBalancerIPs: 10.214.0.32
 spec:
   type: LoadBalancer
   selector:

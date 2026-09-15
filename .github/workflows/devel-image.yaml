@@ -28,6 +28,10 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.actor }}/homelab-devel
+          tags: |
+              type=sha
+              type=ref,event=branch
+              type=raw,value=latest
 
       - name: Build and push Docker image
         id: push

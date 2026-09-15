@@ -1,3 +1,9 @@
+apiVersion: metallb.io/v1beta1
+kind: BGPAdvertisement
+metadata:
+  name: home-advert
+  namespace: metallb-system
+---
 apiVersion: metallb.io/v1beta2
 kind: BGPPeer
 metadata:
@@ -16,9 +22,3 @@ metadata:
 spec:
   addresses:
     - 10.214.0.1-10.214.0.254
----
-apiVersion: metallb.io/v1beta1
-kind: BGPAdvertisement
-metadata:
-  name: home-advert
-  namespace: metallb-system
