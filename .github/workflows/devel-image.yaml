@@ -27,7 +27,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v6
         with:
-          images: ghcr.io/${{ github.actor }}/homelab-devel
+          images: ghcr.io/${{ github.repository_owner }}/homelab-devel
           tags: |
               type=sha
               type=ref,event=branch
@@ -45,6 +45,6 @@ jobs:
       - name: Generate artifact attestation
         uses: actions/attest@v4
         with:
-          subject-name: ghcr.io/${{ github.actor }}/homelab-devel
+          subject-name: ghcr.io/${{ github.repository_owner }}/homelab-devel
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true

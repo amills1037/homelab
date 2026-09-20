@@ -54,6 +54,15 @@ spec:
         - name: auth-keys
           configMap:
             name: ssh-authorized-keys
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-type
+                operator: In
+                values:
+                - server
       initContainers:
         - name: file-prep
           image: debian:trixie # This should match block-break-dev container
