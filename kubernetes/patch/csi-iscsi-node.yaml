@@ -1,0 +1,13 @@
+# #
+# kubectl patch daemonset csi-iscsi-node -n kube-system --patch-file patch/csi-iscsi-node.yaml
+# #
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-iscsi-node
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      tolerations:
+        - operator: "Exists"

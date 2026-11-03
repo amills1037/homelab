@@ -16,6 +16,13 @@
    # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.13.4/deploy/install-driver.sh | bash -s v4.13.4 --
    # ## not installed yet # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-iscsi/master/deploy/install-driver.sh | bash -s master --
    #
+   # kubectl create namespace argocd
+   # kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+   #
+   # kubectl patch deployment argocd-server -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"node-type": "cluster"}}}}}'
+   # kubectl patch deployment argocd-repo-server -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"node-type": "cluster"}}}}}'
+   # kubectl patch statefulset argocd-application-controller -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"your-node-label-key": "your-node-label-value"}}}}}'
+   #
 ---
 - name: Initialize K3S seconday control planes
   hosts: kube_secondary_nodes

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Node
+metadata:
+  name: rasp1
+  labels:
+    node-type: cluster
+    disktype: longhorn
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: rasp2
+  labels:
+    node-type: cluster
+    disktype: longhorn
+---
+apiVersion: v1
+kind: Node
+metadata:
+  name: rasp3
+  labels:
+    node-type: cluster
+    disktype: longhorn

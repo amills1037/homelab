@@ -87,3 +87,8 @@ spec:
           - name: homelab-dev-home
             mountPath: /home
             subPath: homelab
+      tolerations:
+        - key: "server"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"

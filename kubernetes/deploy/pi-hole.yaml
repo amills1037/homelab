@@ -74,7 +74,8 @@ spec:
         name: pi-hole-storage
         namespace: pi-hole
       spec:
-        accessModes: [ "ReadWriteOnce" ]
+        accessModes:
+          - ReadWriteOnce
         storageClassName: cluster-storage
         resources:
           requests:

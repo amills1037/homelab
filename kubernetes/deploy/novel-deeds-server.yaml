@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: novel-deeds-service
+  namespace: novel-deeds
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+  selector:
+    app: novel-deeds-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: novel-deeds-server
+  namespace: novel-deeds
+  annotations:
+      tailscale.com/expose: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: novel-deeds-server
+  template:
+    metadata:
+      labels:
+        app: novel-deeds-server
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-type
+                operator: In
+                values:
+                - cluster
+      containers:
+        - name: novel-deeds-server
+          image: ghcr.io/sbustillos/noveldeeds-server:master
+          imagePullPolicy: Always
+          env:
+            - name: DB_HOST
+              value: postgresql-service.novel-deeds
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-connection
+                  key: database
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-connection
+                  key: password
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-connection
+                  key: user
+      imagePullSecrets:
+        - name: ghcr-secret
+      tolerations:
+        - key: "server"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"

@@ -1,0 +1,6 @@
+
+kubectl create secret docker-registry ghcr-secret \
+  --docker-server=ghcr.io \
+  --docker-username=<> \
+  --docker-password=<> \
+  --docker-email=<>
