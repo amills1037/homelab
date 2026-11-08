@@ -1,0 +1,12 @@
+---
+- name: Update Debian packages
+  hosts: debian
+  become: true
+
+  tasks:
+    - name: Run apt update and upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: true
+        autoclean: true
+        autoremove: true
