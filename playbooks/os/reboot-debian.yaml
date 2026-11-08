@@ -1,6 +1,6 @@
 ---
-- name: Reboot servers one at a time
-  hosts: kube_nodes
+- name: Reboot Debian servers one at a time
+  hosts: debian
   become: true
   serial: 1
 

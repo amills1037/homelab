@@ -3,38 +3,33 @@
   hosts: kube_prime_node
   become: true
   vars_files:
-    - ../k3s-vars.yaml
+    - ../../k3s-vars.yaml
   tasks:
     - name: Init cluster on primary node
       ansible.builtin.shell: |
-        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --cluster-init
+        curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --cluster-init
 
    # kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/main/config/manifests/metallb-native.yaml
    # kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.12.0/deploy/longhorn.yaml
    # kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
    # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.13.4/deploy/install-driver.sh | bash -s v4.13.4 --
-   # ## not installed yet # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-iscsi/master/deploy/install-driver.sh | bash -s master --
+   # curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-iscsi/master/deploy/install-driver.sh | bash -s master --
    #
    # kubectl create namespace argocd
    # kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
    #
-   # kubectl patch deployment argocd-server -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"node-type": "cluster"}}}}}'
-   # kubectl patch deployment argocd-repo-server -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"node-type": "cluster"}}}}}'
-   # kubectl patch statefulset argocd-application-controller -n argocd -p '{"spec": {"template": {"spec": {"nodeSelector": {"your-node-label-key": "your-node-label-value"}}}}}'
-   #
----
+
 - name: Initialize K3S seconday control planes
   hosts: kube_secondary_nodes
   become: true
   vars_files:
-    - ../k3s-vars.yaml
+    - ../../k3s-vars.yaml
   tasks:
     - name: Init cluster on seconday nodes
       ansible.builtin.shell: |
-        echo curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --server https://{{ k3s_prime_ip }}:6443
+        curl -sfL https://get.k3s.io | K3S_TOKEN={{ k3s_token }} sh -s - server --disable=servicelb --server https://{{ k3s_primary_ip }}:6443
 
----
 - name: Initialize K3S control planes
   hosts: kube_control_plane_nodes
   become: true

@@ -36,14 +36,3 @@
           - open-iscsi
           - nfs-common
         update_cache: true
-- name: Update Debian nodes to support K3S
-  hosts: debian
-  become: true
-  tasks:
-    - name: Add packages
-      ansible.builtin.package:
-        name:
-          - curl
-          - open-iscsi
-          - nfs-common
-        update_cache: true

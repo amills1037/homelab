@@ -1,7 +1,10 @@
 ---
-- name: Bootstrap Raspbian servers
-  hosts: raspberry_os_pi
+- name: Bootstrap Debian servers
+  hosts: raspberry_pi_os
   become: true
+  gather_facts: false
+  vars_files:
+    - ../ssh-keys.yaml
   tasks:
     - name: Install ansible public key
       ansible.builtin.shell: |
@@ -13,9 +16,3 @@
           chown ansible:ansible ~ansible/.ssh/authorized_keys
       args:
         creates: /home/ansible/.ssh/authorized_keys
-
-    - name: Add ansible as sudoer
-      ansible.builtin.copy:
-        content: "ansible ALL=(ALL) NOPASSWD:ALL\n"
-        dest: /etc/sudoers.d/99-ansible-users
-        force: no

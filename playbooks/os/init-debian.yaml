@@ -1,0 +1,12 @@
+- name: Add packages to debian
+  hosts: debian
+  become: true
+  tasks:
+    - name: Add packages
+      ansible.builtin.package:
+        name:
+          - curl
+          - open-iscsi
+          - nfs-common
+          - docker-compose
+        update_cache: true
