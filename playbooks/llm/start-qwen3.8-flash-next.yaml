@@ -1,0 +1,33 @@
+---
+- name: Start Qwen 3.8 Flash Next model
+  hosts: aila
+
+  tasks:
+    - name: Create llm directory
+      ansible.builtin.file:
+        path: ~/qwen3.8-flash-next
+        state: directory
+        mode: '0755'
+
+    - name: Create copy docker files
+      ansible.builtin.copy:
+        src: ../../images/qwen3.8-flash-next/
+        dest: ~/qwen3.8-flash-next/
+
+    # - name: Download model
+    #   ansible.builtin.get_url:
+    #     url: https://huggingface.co/unsloth/Qwen3.8-27B-GGUF/resolve/main/Qwen3.8-27B-UD-Q8_K_XL.gguf?download=true
+    #     dest: ~/qwen3.8-27b/Qwen3.8-27B-UD-Q8_K_XL.gguf
+    #     mode: '0644'
+    #     force: false
+
+    - name: Run docker compose up
+      community.docker.docker_compose_v2:
+        project_src: qwen3.8-flash-next
+        state: present
+        build: always
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

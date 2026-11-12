@@ -1,0 +1,14 @@
+---
+- name: Stop Open WebUI
+  hosts: aila
+
+  tasks:
+    - name: Run docker compose down
+      community.docker.docker_compose_v2:
+        project_src: open-webui
+        state: absent
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

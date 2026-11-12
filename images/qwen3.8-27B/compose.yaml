@@ -1,0 +1,57 @@
+services:
+  llm-qwen3.8:
+    hostname: qwen
+    image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+    environment:
+      - RADV_PERFTEST=nogttspill
+      - GGML_VK_ALLOW_GRAPHICS_QUEUE=1
+      - AMD_VULKAN_ICD=RADV
+    restart: unless-stopped
+    command:
+      - --server
+      - --port
+      - "8001"
+      - --host
+      - 0.0.0.0
+      - -m
+      - /data/Qwen3.8-27B-UD-Q8_K_XL.gguf
+      # - -md
+      # - /data/mtp-Qwen3.8-27B-Q4_0.gguf
+      - --ctx-size
+      - "131072"
+      - --cache-type-k
+      - q4_0
+      - --cache-type-v
+      - q4_0
+      - --temp
+      - "1.0"
+      - --top_p
+      - "0.95"
+      - --top_k
+      - "20"
+      - --min_p
+      - "0.0"
+      - --presence_penalty
+      - "0.0"
+      - --repeat_penalty
+      - "1.0"
+      - --spec-type
+      - draft-mtp
+      - --spec-draft-n-max
+      - "2"
+      - --parallel
+      - "1"
+      - --load-mode
+      - mmap
+    volumes:
+      - /home/ansible/qwen3.8-27b:/data
+    privileged: true
+    group_add:
+      - video #44
+      - 992 #render
+    ipc: host
+    ports:
+      - "8001:8001"
+    devices:
+      - /dev/kfd
+      - /dev/dri

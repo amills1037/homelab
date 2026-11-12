@@ -1,0 +1,17 @@
+services:
+  devel:
+    hostname: homelab-devel
+    restart: unless-stopped
+    build: .
+    ports:
+      - "2022:22"
+    volumes:
+      - devel_home:/home
+
+volumes:
+  devel_home:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.7.227,rw,nfsvers=4.1,hard
+      device: :/volume1/devel/pvc-175b234e-1fe7-4722-9286-6d28963d697a/homelab

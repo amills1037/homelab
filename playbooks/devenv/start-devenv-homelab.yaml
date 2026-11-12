@@ -1,0 +1,24 @@
+---
+- name: Start devel enviornment
+  hosts: devel
+
+  tasks:
+    - name: Create keyrings directory
+      ansible.builtin.file:
+        path: ~/homelab
+        state: directory
+        mode: '0755'
+
+    - name: Create keyrings directory
+      ansible.builtin.copy:
+        src: ../../images/devel/
+        dest: ~/homelab/
+
+    - name: Run docker compose up
+      community.docker.docker_compose_v2:
+        project_src: homelab
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

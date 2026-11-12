@@ -1,0 +1,14 @@
+---
+- name: Stop Gemma 4 model
+  hosts: aila
+
+  tasks:
+    - name: Run docker compose down
+      community.docker.docker_compose_v2:
+        project_src: gemma4
+        state: absent
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

@@ -1,0 +1,14 @@
+---
+- name: Stop Qwen 3.8 Flash Next model
+  hosts: aila
+
+  tasks:
+    - name: Run docker compose down
+      community.docker.docker_compose_v2:
+        project_src: qwen3.8-flash-next
+        state: absent
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

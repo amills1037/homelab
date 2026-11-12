@@ -1,0 +1,26 @@
+---
+- name: Start Open WebUI
+  hosts: aila
+
+  tasks:
+    - name: Create llm directory
+      ansible.builtin.file:
+        path: ~/open-webui
+        state: directory
+        mode: '0755'
+
+    - name: Create copy docker files
+      ansible.builtin.copy:
+        src: ../../images/open-webui/
+        dest: ~/open-webui/
+
+    - name: Run docker compose up
+      community.docker.docker_compose_v2:
+        project_src: open-webui
+        state: present
+        build: always
+      register: output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: output

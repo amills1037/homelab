@@ -1,0 +1,39 @@
+services:
+  gemma4:
+    hostname: gemma
+    image: ghcr.io/ggml-org/llama.cpp:full-vulkan
+    restart: unless-stopped
+    # --temp 1.0 --top-p 0.95 --top-k 64 --spec-type draft-mtp --spec-draft-n-max 2
+    command:
+      - --server
+      - --port
+      - "8001"
+      - --host
+      - 0.0.0.0
+      - -m
+      - /data/gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf
+      - -md
+      - /data/mtp-gemma-4-26B-A4B-it-Q4_0.gguf
+      - --ctx-size
+      - "131072"
+      - --temp
+      - "1.0"
+      - --top_p
+      - "0.95"
+      - --top_k
+      - "64"
+      - --spec-type
+      - draft-mtp
+      - --spec-draft-n-max
+      - "4"
+    volumes:
+      - /home/ansible/gemma4:/data
+    privileged: true
+    group_add:
+      - video
+    ipc: host
+    ports:
+      - "8002:8001"
+    devices:
+      - /dev/kfd
+      - /dev/dri

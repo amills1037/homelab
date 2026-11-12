@@ -2,11 +2,53 @@
   hosts: debian
   become: true
   tasks:
-    - name: Add packages
+    # - name: Add packages
+    #   ansible.builtin.package:
+    #     name:
+    #       - curl
+    #       - open-iscsi
+    #       - nfs-common
+    #       - ca-certificates
+    #     update_cache: true
+
+    - name: Create keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Download a docker key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Add the docker repository
+      ansible.builtin.copy:
+        content: |
+          Types: deb
+          URIs: https://download.docker.com/linux/debian
+          Suites: trixie
+          Components: stable
+          Architectures: amd64
+          Signed-By: /etc/apt/keyrings/docker.asc
+
+        dest: /etc/apt/sources.list.d/docker.sources
+
+    - name: Add docker packages
       ansible.builtin.package:
         name:
-          - curl
-          - open-iscsi
-          - nfs-common
-          - docker-compose
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
         update_cache: true
+
+    - name: Add ansible to docker group
+      ansible.builtin.user:
+        name: ansible
+        groups: docker
+        append: yes
